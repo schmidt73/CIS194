@@ -16,6 +16,9 @@ fibs2 = map fst . iterate (\(a, b) -> (b, a + b)) $ (0, 1)
 
 data Stream a = Cons a (Stream a)
 
+instance Show a => Show (Stream a) where
+        show a = "[" ++ intercalate "," (map show (streamToList a)) ++ "]"
+
 streamToList :: Stream a -> [a]
 streamToList (Cons x xs) = x : streamToList xs
 
@@ -46,10 +49,9 @@ instance Num (Stream Integer) where
         (+) (Cons x xs) (Cons y ys) = Cons (x + y) (xs + ys)
         (*) (Cons x xs) b@(Cons y ys) = Cons (x * y) ((streamMap (*x) ys) + xs * b)
 
-instance Show (Stream Integer) where
-        show a = concat . map (\(a, b) -> (show a) ++ "x^" ++ (show b) ++ " ") . 
-                 filter (\(a,b) -> if a == 0 then False else True) $ (zip xs [0 .. ])
-                where xs = streamToList a
-
 instance Fractional (Stream Integer) where
-        (/) a@(Cons x xs) b@(Cons y ys) = 
+        (/) a@(Cons x xs) b@(Cons y ys) = Cons (x `div` y) (streamMap (`div` y) (xs - q * ys))
+                where q = a / b
+
+fibs3 :: Stream Integer
+fibs3 = (x / (1 - x - x ^ 2))
