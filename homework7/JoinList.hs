@@ -25,23 +25,16 @@ _      !!? i | i < 0 = Nothing
 (x:xs) !!? 0         = Just x
 (x:xs) !!? i         = xs !!? (i - 1)
 
+jlSize :: (Sized b, Monoid b) => JoinList b a -> Int
+jlSize (Single _ _) = 1
+jlSize jl           = getSize . size . tag $ jl
+
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ _ Empty                                    = Nothing
-indexJ i (Append m _ _) | i >= (getSize (size m)) = Nothing
-
+indexJ _ Empty        = Nothing
 indexJ 0 (Single _ a) = Just a
-indexJ i (Append m l@(Append lm _ _) r)
-        | i >= ls   = indexJ (i - ls) r
-        | otherwise = indexJ i l
-   where s = getSize . size $ m
-         ls = getSize . size $ lm
-
-indexJ i (Append m l r@(Append rm _ _)) = indexJ (i - (s - rs)) r
-   where s = getSize . size $ m
-         rs = getSize . size $ rm
-
-indexJ i (Append m l@(Single _ lx) r@(Single _ rx))
-        | i == 0 = Just lx
-        | i == 1 = Just rx
-        | otherwise = Nothing
+indexJ _ (Single _ _) = Nothing
+indexJ i (Append m l r)
+        | i < k     = indexJ i l
+        | otherwise = indexJ (i - k) r
+   where k = jlSize l
 
