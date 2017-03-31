@@ -38,3 +38,7 @@ indexJ i (Append m l r)
         | otherwise = indexJ (i - k) r
    where k = jlSize l
 
+dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJ _ Empty = Empty
+dropJ 0 jl    = jl
+dropJ i 
